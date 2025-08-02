@@ -1,5 +1,7 @@
-import os
+import os, sys
 from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL   = "/static/"
 MEDIA_URL    = "/media/"
@@ -40,6 +42,16 @@ DATABASES = {
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
+
+if "test" in sys.argv or os.getenv("RUN_TESTS") == "1":
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME":   BASE_DIR / "test_db.sqlite3",
+    }
+    # Silence the “unable to connect to postgres” warning
+    import warnings, django.db.utils
+    warnings.filterwarnings("ignore", category=RuntimeWarning,
+                            module="django.db.backends.postgresql")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
