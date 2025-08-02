@@ -2,9 +2,9 @@ name: Notejam CI/CD
 
 on:
   push:
-    branches: [ CPassignment ]          
+    branches: [ CPassignment-edge ]          
   pull_request:
-    branches: [ CPassignment ]
+    branches: [ CPassignment-edge ]
 
 env:
   AWS_REGION:      ${{ vars.AWS_REGION }}     
