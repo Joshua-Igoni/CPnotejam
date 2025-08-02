@@ -74,5 +74,4 @@ jobs:
         run: |
           gh workflow run deploy.yml \
             --repo Joshua-Igoni/CPterraform \
-            --ref main \
             -f image_uri=${{ needs.build-push.outputs.image_uri }}
