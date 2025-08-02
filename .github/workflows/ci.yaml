@@ -74,5 +74,5 @@ jobs:
           GH_TOKEN: ${{ secrets.REPO_B_TOKEN }}     
         run: |
           gh workflow run deploy.yml \
-            --repo Joshua-Igoni/CPterraform \
+            --repo Joshua-Igoni/CPterraform-edge \
             -f image_uri=${{ needs.build-push.outputs.image_uri }}
