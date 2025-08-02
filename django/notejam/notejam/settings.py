@@ -1,6 +1,23 @@
 import os
 from pathlib import Path
 
+STATIC_URL   = "/static/"
+MEDIA_URL    = "/media/"
+
+STATIC_ROOT  = BASE_DIR / "staticfiles"
+MEDIA_ROOT   = BASE_DIR / "media"
+
+# make collectstatic upload into the S3 bucket
+AWS_S3_REGION_NAME = "eu-central-1"
+AWS_STORAGE_BUCKET_NAME = os.environ.get("STATIC_BUCKET")
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_DEFAULT_ACL = None
+
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
@@ -152,6 +169,7 @@ INSTALLED_APPS = (
     'pads',
     'notes',
     'users',
+    'storages',
 )
 
 AUTHENTICATION_BACKENDS = (

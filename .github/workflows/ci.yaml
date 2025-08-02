@@ -60,12 +60,13 @@ jobs:
           docker build -t "$IMAGE_URI" -f django/dockerfile django
           docker push "$IMAGE_URI"
           echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+      
 
 # ─────────── 3. Trigger infra repo ───────────
   trigger-infra:
     needs: build-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/CPassignment'
+    if: github.ref == 'refs/heads/CPassignment-edge'
 
     steps:
       - name: Trigger infra workflow
