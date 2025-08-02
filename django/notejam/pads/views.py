@@ -1,9 +1,12 @@
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from pads.models import Pad
+from django.http import Http404
 
 
 from pads.models import Pad
@@ -38,11 +41,20 @@ class PadUpdateView(UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, self.success_message)
-        return super(PadUpdateView, self).form_valid(form)
+        return super().form_valid(form)
+    
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.user_id != self.request.user.id:
+            raise Http404
+        return obj
 
     def get_queryset(self):
-        qs = super(PadUpdateView, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        qs = super().get_queryset()
+        user = self.request.user
+        if not user.is_authenticated:
+            raise Http404               
+        return qs.filter(user_id=user.id)
 
     def get_success_url(self):
         return reverse_lazy("view_pad_notes", kwargs={'pk': self.object.pk})
@@ -76,4 +88,7 @@ class PadDeleteView(DeleteView):
 
     def get_queryset(self):
         qs = super(PadDeleteView, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return qs.none()               
+        return qs.filter(user_id=user.id)

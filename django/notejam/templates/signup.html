@@ -1,0 +1,16 @@
+<!-- templates/signup.html -->
+<!doctype html>
+<html>
+<head><title>Sign up</title></head>
+<body>
+{% if form.errors %}
+  {{ form.errors }}
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Create account</button>
+</form>
+</body>
+</html>

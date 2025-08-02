@@ -1,18 +1,14 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase, Client
-
+from django.contrib.auth.models import User
 from notejam.tests import create_user
 from pads.models import Pad
 
 
 class PadTest(TestCase):
     def setUp(self):
-        user_data = {
-            'email': 'user@example.com',
-            'password': 'secure_password'
-        }
-        self.user = create_user(user_data)
-        self.client.login(**user_data)
+        self.user = User.objects.create_user(username='user@example.com', email='user@example.com', password='secure_password')
+        self.client.login(username='user@example.com', password='secure_password')
 
     def _create_pads(self, pads):
         return [

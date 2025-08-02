@@ -1,6 +1,16 @@
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
+from django.contrib.auth import get_user_model
+
+
+def create_user(user_data):
+    User = get_user_model()
+    return User.objects.create_user(
+        username=user_data['email'],  # or any unique username
+        email=user_data['email'],
+        password=user_data['password']
+    )
 
 
 class SignUpTest(TestCase):

@@ -1,8 +1,9 @@
 import os
+from pathlib import Path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 PROJECT_DIR = "{}/../".format(os.path.dirname(__file__))
 
@@ -14,12 +15,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'notejam.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'notejam'),
+        'USER': os.environ.get('POSTGRES_USER', 'notejam'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'notejam'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -90,6 +91,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
+    "django.template.context_processors.request",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
@@ -109,6 +111,14 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+MIDDLEWARE = [
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+]
+
 ROOT_URLCONF = 'notejam.urls'
 
 APPEND_SLASH = True
@@ -116,9 +126,20 @@ APPEND_SLASH = True
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'notejam.wsgi.application'
 
-TEMPLATE_DIRS = (
-    os.path.join(PROJECT_DIR, 'templates/'),
-)
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+            ],
+        },
+    }
+]
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -131,7 +152,6 @@ INSTALLED_APPS = (
     'pads',
     'notes',
     'users',
-    'south',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -176,7 +196,7 @@ LOGGING = {
 }
 
 # custom test runner
-TEST_RUNNER = 'notejam.tests.AdvancedTestSuiteRunner'
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # exclude non app tests
 TEST_EXCLUDE = (

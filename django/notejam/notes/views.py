@@ -1,9 +1,11 @@
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView
+from django.contrib.auth.views import LogoutView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 from notes.models import Note, Pad
@@ -19,12 +21,9 @@ class NoteCreateView(CreateView):
     def get_initial(self):
         return {'pad': self.request.GET.get('pad', None)}
 
-    def get_form(self, form_class):
-        form = super(NoteCreateView, self).get_form(self.get_form_class())
-        # limit pad choice
-        form.fields['pad'].queryset = Pad.objects.filter(
-            user=self.request.user
-        )
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['pad'].queryset = Pad.objects.filter(user=self.request.user)
         return form
 
     def form_valid(self, form):
@@ -56,14 +55,14 @@ class NoteUpdateView(UpdateView):
 
     def get_queryset(self):
         qs = super(NoteUpdateView, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return qs.none()               
+        return qs.filter(user_id=user.id)
 
-    def get_form(self, form_class):
-        form = super(NoteUpdateView, self).get_form(self.get_form_class())
-        # limit pad choice
-        form.fields['pad'].queryset = Pad.objects.filter(
-            user=self.request.user
-        )
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['pad'].queryset = Pad.objects.filter(user=self.request.user)
         return form
 
     def get_success_url(self):
@@ -80,7 +79,10 @@ class NoteDeleteView(DeleteView):
 
     def get_queryset(self):
         qs = super(NoteDeleteView, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return qs.none()               
+        return qs.filter(user_id=user.id)
 
     def get_success_url(self):
         if self.object.pad is not None:
@@ -96,15 +98,22 @@ class NoteDetailView(DetailView):
 
     def get_queryset(self):
         qs = super(NoteDetailView, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return qs.none()               
+        return qs.filter(user_id=user.id)
 
 
-class NoteListView(ListView):
+class NoteListView(LoginRequiredMixin, ListView):
     model = Note
     context_object_name = 'notes'
     order_by = '-updated_at'
 
     def get_queryset(self):
-        qs = super(NoteListView, self).get_queryset()
-        order_by = self.request.GET.get('order', self.order_by)
-        return qs.filter(user=self.request.user).order_by(order_by)
+        order = self.request.GET.get("order", self.order_by)
+        return (
+            super()
+            .get_queryset()
+            .filter(user=self.request.user)        
+            .order_by(order)
+        )
