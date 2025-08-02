@@ -33,12 +33,12 @@ jobs:
 # ────────────────────────── 2. Build & Push ─────────────────────────
   build-push:
     needs: test
-    if: github.ref == 'refs/heads/CPassignment'
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
+    if: github.ref == 'refs/heads/CPassignment'
 
     outputs:
-      image_uri: ${{ steps.meta.outputs.image_uri }}
+      image_uri: ${{ steps.build.outputs.image_uri }}
 
     steps:
       - uses: actions/checkout@v4
@@ -53,29 +53,26 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & push
+      - name: Build & push image                 
+        id: build
         run: |
           IMAGE_URI=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
-          docker build -t "${IMAGE_URI}" -f django/dockerfile django
-          docker push "${IMAGE_URI}"
-          echo "IMAGE_URI=${IMAGE_URI}" | tee -a $GITHUB_OUTPUT
+          docker build -t "$IMAGE_URI" -f django/dockerfile django
+          docker push "$IMAGE_URI"
+          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
 
-      - name: Export output
-        id: meta
-        run: |
-          echo "image_uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
-
-# ──────────────────────── 3. Trigger infra repo ─────────────────────
+# ─────────── 3. Trigger infra repo ───────────
   trigger-infra:
     needs: build-push
-    if: github.ref == 'refs/heads/CPassignment'
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/CPassignment'
+
     steps:
       - name: Trigger infra workflow
         env:
-          GH_TOKEN: ${{ secrets.REPO_B_TOKEN }}
+          GH_TOKEN: ${{ secrets.REPO_B_TOKEN }}     
         run: |
           gh workflow run deploy.yml \
             --repo Joshua-Igoni/CPterraform \
             --ref main \
-            -f image_uri='${{ needs.build-push.outputs.image_uri }}'
+            -f image_uri=${{ needs.build-push.outputs.image_uri }}
