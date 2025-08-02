@@ -35,7 +35,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
-    if: github.ref == 'refs/heads/CPassignment'
+    if: github.ref == 'refs/heads/CPassignment-edge'
 
     outputs:
       image_uri: ${{ steps.build.outputs.image_uri }}
