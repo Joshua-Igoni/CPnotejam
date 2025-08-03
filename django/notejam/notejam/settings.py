@@ -18,11 +18,21 @@ AWS_DEFAULT_ACL = None
 STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
+CF_DOMAIN = os.getenv("CLOUDFRONT_DOMAIN")      
+if CF_DOMAIN:                                   
+    CSRF_TRUSTED_ORIGINS = [f"https://{CF_DOMAIN}"]
+else:
+    # local dev fallback
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
 
+# already-present security flags
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE   = True
+CSRF_COOKIE_SECURE      = True
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "CF_DOMAIN", "localhost").split(",")
 
 PROJECT_DIR = "{}/../".format(os.path.dirname(__file__))
 
