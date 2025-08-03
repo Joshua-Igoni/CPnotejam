@@ -15,11 +15,14 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get("STATIC_BUCKET")
 AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_DEFAULT_ACL = None
 
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
+
 STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 CF_DOMAIN = os.getenv("CLOUDFRONT_DOMAIN")      
-if CF_DOMAIN:                                   
+if CF_DOMAIN:
+    ALLOWED_HOSTS.append(CF_DOMAIN)                                   
     CSRF_TRUSTED_ORIGINS = [f"https://{CF_DOMAIN}"]
 else:
     # local dev fallback
@@ -32,7 +35,7 @@ CSRF_COOKIE_SECURE      = True
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "CF_DOMAIN", "localhost").split(",")
+
 
 PROJECT_DIR = "{}/../".format(os.path.dirname(__file__))
 
