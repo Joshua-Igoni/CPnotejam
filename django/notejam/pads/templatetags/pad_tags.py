@@ -25,14 +25,14 @@ class GetPadsNode(template.Node):
         self.var_name = var_name
 
     def render(self, context):
-     
+        # always ask the request object for the user
         request = context.get("request")
-        user    = getattr(request, "user", None)
-
-        if user and user.is_authenticated:
-            context[self.var_name] = Pad.objects.filter(user=user)
+        if request and request.user.is_authenticated:
+            qs = Pad.objects.filter(user=request.user)
         else:
-            context[self.var_name] = Pad.objects.none()
+            qs = Pad.objects.none()
+
+        context[self.var_name] = qs
         return ""
 
 
