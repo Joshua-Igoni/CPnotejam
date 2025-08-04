@@ -57,6 +57,11 @@ docker build -t notejam-app:latest .
 docker compose -f docker-compose.yml up --build
 ```
 🌐 **CI/CD (GitHub Actions)**
+
+### Requirements
+- aws role with OICD with permissions attached (see terraform repo for policy.json)
+- aws ECR URI stored as variable in your repo
+
 1. **App Pipeline (.github/workflows/app.yml)**
 
 - Tests on push/PR to CPassignment
