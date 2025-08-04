@@ -1,9 +1,41 @@
-import os
+import os, sys
 from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATIC_URL   = "/static/"
+MEDIA_URL    = "/media/"
+
+STATIC_ROOT  = BASE_DIR / "staticfiles"
+MEDIA_ROOT   = BASE_DIR / "media"
+
+# make collectstatic upload into the S3 bucket
+AWS_S3_REGION_NAME = "eu-central-1"
+AWS_STORAGE_BUCKET_NAME = os.environ.get("STATIC_BUCKET")
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_DEFAULT_ACL = None
+
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
+
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+CF_DOMAIN = os.getenv("CLOUDFRONT_DOMAIN")      
+if CF_DOMAIN:
+    ALLOWED_HOSTS.append(CF_DOMAIN)                                   
+    CSRF_TRUSTED_ORIGINS = [f"https://{CF_DOMAIN}"]
+else:
+    # local dev fallback
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
+
+# already-present security flags
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE   = True
+CSRF_COOKIE_SECURE      = True
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
+
 
 PROJECT_DIR = "{}/../".format(os.path.dirname(__file__))
 
@@ -23,6 +55,16 @@ DATABASES = {
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
+
+if "test" in sys.argv or os.getenv("RUN_TESTS") == "1":
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME":   BASE_DIR / "test_db.sqlite3",
+    }
+    # Silence the “unable to connect to postgres” warning
+    import warnings, django.db.utils
+    warnings.filterwarnings("ignore", category=RuntimeWarning,
+                            module="django.db.backends.postgresql")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -152,6 +194,7 @@ INSTALLED_APPS = (
     'pads',
     'notes',
     'users',
+    'storages',
 )
 
 AUTHENTICATION_BACKENDS = (

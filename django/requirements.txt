@@ -5,3 +5,6 @@ psycopg2-binary==2.9.9
 South==1.0
 sqlparse==0.5.3
 tzdata==2025.2
+boto3==1.28.0
+botocore==1.31.0
+django-storages[boto3]>=1.14.0

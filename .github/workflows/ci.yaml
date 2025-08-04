@@ -60,6 +60,7 @@ jobs:
           docker build -t "$IMAGE_URI" -f django/dockerfile django
           docker push "$IMAGE_URI"
           echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+      
 
 # ─────────── 3. Trigger infra repo ───────────
   trigger-infra:
@@ -74,4 +75,5 @@ jobs:
         run: |
           gh workflow run deploy.yml \
             --repo Joshua-Igoni/CPterraform \
+            --ref main \
             -f image_uri=${{ needs.build-push.outputs.image_uri }}

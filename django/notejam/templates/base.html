@@ -55,14 +55,14 @@
       <!-- pad template tag -->
       <nav>
         {% get_pads as my_pads %}
-        {% if my_pads.count > 0 %}
-        <ul>
-          {% for pad in my_pads %}
-            <li><a href="{% url 'view_pad_notes' pk=pad.id %}">{{ pad.name }}</a></li>
-          {% endfor %}
-        </ul>
+        {% if my_pads %}
+          <ul>
+            {% for pad in my_pads %}
+              <li><a href="{% url 'view_pad_notes' pk=pad.id %}">{{ pad.name }}</a></li>
+            {% endfor %}
+          </ul>
         {% else %}
-        <p class="empty">No pads</p>
+          <p class="empty">No pads</p>
         {% endif %}
         <hr />
         <a href="{% url 'create_pad' %}">New pad</a>
