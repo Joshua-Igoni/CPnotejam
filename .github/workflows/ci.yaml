@@ -2,9 +2,9 @@ name: Notejam CI/CD
 
 on:
   push:
-    branches: [ CPassignment-edge ]          
+    branches: [ CPassignment ]          
   pull_request:
-    branches: [ CPassignment-edge ]
+    branches: [ CPassignment ]
 
 env:
   AWS_REGION:      ${{ vars.AWS_REGION }}     
@@ -35,7 +35,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
-    if: github.ref == 'refs/heads/CPassignment-edge'
+    if: github.ref == 'refs/heads/CPassignment'
 
     outputs:
       image_uri: ${{ steps.build.outputs.image_uri }}
@@ -66,7 +66,7 @@ jobs:
   trigger-infra:
     needs: build-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/CPassignment-edge'
+    if: github.ref == 'refs/heads/CPassignment'
 
     steps:
       - name: Trigger infra workflow
@@ -75,5 +75,5 @@ jobs:
         run: |
           gh workflow run deploy.yml \
             --repo Joshua-Igoni/CPterraform \
-            --ref edge \
+            --ref main \
             -f image_uri=${{ needs.build-push.outputs.image_uri }}
